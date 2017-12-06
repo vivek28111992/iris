@@ -6,7 +6,6 @@ const service = require('../server/service')
 const slackClient = require('../server/slackClient')
 const server = http.createServer(service)
 
-console.log('token '+process.env.SLACK_BOT_TOKEN)
 const bot_token = process.env.SLACK_BOT_TOKEN || '';
 const slackLogLevel = 'verbose'
 
