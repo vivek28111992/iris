@@ -1,9 +1,18 @@
 'use strict';
-
-const service = require('../server/service')
+require('dotenv').config({path: '../.env'})
 const http = require('http')
 
+const service = require('../server/service')
+const slackClient = require('../server/slackClient')
 const server = http.createServer(service)
+
+console.log('token '+process.env.SLACK_BOT_TOKEN)
+const bot_token = process.env.SLACK_BOT_TOKEN || '';
+const slackLogLevel = 'verbose'
+
+const rtm = slackClient.init(bot_token, slackLogLevel);
+rtm.start();
+
 server.listen(3000)
 
 server.on('listening', function(){
