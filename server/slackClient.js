@@ -21,12 +21,12 @@ module.exports.init = function slackClient(bot_token, logLevel, nlpClient){
 		if(message.text.toLowerCase().includes('iris')) {
 			nlp.ask(message.text, (err, res) => {
 				if(err) {
-					console.log(err);
+					console.log('Error '+err);
 					return
 				}
 
 				try {
-					if(!res.intent || !res.intent[0] || res.intent[0].value) {
+					if(!res.intent || !res.intent[0] || !res.intent[0].value) {
 						throw new Error("Could not extract intent.")
 					}
 
@@ -35,24 +35,14 @@ module.exports.init = function slackClient(bot_token, logLevel, nlpClient){
 					intent.process(res, function(error, response) {
 						if(error) {
 							console.log(error.message);
-							return
+							return rtm.sendMessage(`Sorry, I don't know what are you talking about.`, message.channel)
 						}
 
 						return rtm.sendMessage(response, message.channel)
 					})
 				} catch(err) {
-					console.log(err);
-					console.log(res);
-					rtm.sendMessage("Sorry, I don't know what you are talking about!", message.channel)
-				}
-
-				if(!res.intent) {
-					return rtm.sendMessage("Sorry, I don't know what are you talking about.", message.channel)
-				} else if(res.intent[0].value == 'time' && res.location) {
-					return rtm.sendMessage(`I don't yet know the time in ${res.location[0].value}.`, message.channel)
-				} else {
-					console.log(res);
-					rtm.sendMessage("Sorry, I don't know what are you talking about.", message.channel);
+					console.log('Error '+err);
+					return rtm.sendMessage("Sorry, I don't know what you are talking about!", message.channel)
 				}
 			})
 		}
