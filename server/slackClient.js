@@ -2,12 +2,14 @@ const RtmClient = require('@slack/client').RtmClient;
 const CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 const RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 let nlp = null;
+let registry = null;
 
 let channel;
-module.exports.init = function slackClient(bot_token, logLevel, nlpClient){
+module.exports.init = function slackClient(bot_token, logLevel, nlpClient, serviceRegistry){
 	const rtm = new RtmClient(bot_token, {logLevel: logLevel});
 	nlp = nlpClient
-
+	registry = serviceRegistry
+	
 	// The client will emit an RTM.AUTHENTICATED event on successful connection, with the `rtm.start` payload
 	rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
 	  for (const c of rtmStartData.channels) {
@@ -32,7 +34,7 @@ module.exports.init = function slackClient(bot_token, logLevel, nlpClient){
 
 					const intent = require('./intents/' + res.intent[0].value + 'Intent');
 
-					intent.process(res, function(error, response) {
+					intent.process(res, registry, function(error, response) {
 						if(error) {
 							console.log(error.message);
 							return rtm.sendMessage(`Sorry, I don't know what are you talking about.`, message.channel)
@@ -49,10 +51,3 @@ module.exports.init = function slackClient(bot_token, logLevel, nlpClient){
 	});
 	return rtm;
 }
-
-// you need to wait for the client to fully connect before you can send messages
-/*rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, function () {
-  rtm.sendMessage("Hello!", channel);
-});
-
-rtm.start();*/
